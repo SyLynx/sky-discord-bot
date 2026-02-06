@@ -1,0 +1,11 @@
+# ============================================
+# 📦 DÉPENDANCES PYTHON
+# ============================================
+# Pour installer : pip install -r requirements.txt
+# ============================================
+
+# Discord.py - La librairie principale pour créer des bots Discord
+discord.py>=2.3.0
+
+# Python-dotenv - Pour charger les variables du fichier .env
+python-dotenv>=1.0.0
