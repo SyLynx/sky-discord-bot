@@ -108,7 +108,6 @@ LIEN_FORM_ANIMATION = "https://forms.google.com/..."
 ## 📁 Project Structure
 
 ```text
-.
 ├── main.py              # Entry point
 ├── bot.py               # Main Bot class & logic
 ├── config.py            # Central configuration
