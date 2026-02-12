@@ -4,6 +4,7 @@
 # Ce module gère :
 # - /annonce-tournage : Formulaire pour postuler à un tournage
 # - /recrutement : Liens vers les formulaires de recrutement
+# - /set-recrutement : Configure les liens (admin only)
 # ============================================
 
 import discord
@@ -17,6 +18,7 @@ from config import (
     SALON_CANDIDATURES_TOURNAGE
 )
 from utils.embeds import embed_succes, embed_erreur, embed_info
+from utils.database import obtenir_liens_recrutement, sauvegarder_lien_recrutement
 
 
 # ============================================
@@ -146,6 +148,18 @@ class Annonces(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
+    def _obtenir_lien(self, type_poste: str) -> str:
+        """
+        Récupère le lien de recrutement pour un poste donné.
+        Priorité : JSON (configuré par /set-recrutement) > config.py (valeur par défaut)
+        """
+        liens_json = obtenir_liens_recrutement()
+        
+        if type_poste == "moderation":
+            return liens_json.get("moderation", LIEN_FORM_MODERATION)
+        else:
+            return liens_json.get("animation", LIEN_FORM_ANIMATION)
+    
     # ================================
     # 📽️ COMMANDE /annonce-tournage
     # ================================
@@ -180,9 +194,20 @@ class Annonces(commands.Cog):
     ):
         """
         Envoie le lien du formulaire Google Forms correspondant au poste choisi.
+        Les liens sont configurables via /set-recrutement.
         """
+        lien = self._obtenir_lien(poste.value)
+        
+        # Vérifie que le lien a été configuré
+        if "(A REMPLIR)" in lien:
+            embed = embed_erreur(
+                "Lien non configuré",
+                "Le lien de recrutement n'a pas encore été configuré !\n\n"
+                "Un administrateur doit utiliser `/set-recrutement` pour le configurer."
+            )
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+        
         if poste.value == "moderation":
-            lien = LIEN_FORM_MODERATION
             titre = "🛡️ Recrutement Modération"
             description = (
                 "Tu veux rejoindre l'équipe de modération ?\n\n"
@@ -196,7 +221,6 @@ class Annonces(commands.Cog):
             couleur = 0x3498DB  # Bleu
             
         else:  # animation
-            lien = LIEN_FORM_ANIMATION
             titre = "🎉 Recrutement Animation"
             description = (
                 "Tu veux rejoindre l'équipe d'animation ?\n\n"
@@ -225,6 +249,49 @@ class Annonces(commands.Cog):
         ))
         
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+    
+    # ================================
+    # ⚙️ COMMANDE /set-recrutement
+    # ================================
+    @app_commands.command(
+        name="set-recrutement",
+        description="[ADMIN] Configure les liens de recrutement"
+    )
+    @app_commands.describe(
+        poste="Le poste dont tu veux changer le lien",
+        lien="Le lien du formulaire Google Forms"
+    )
+    @app_commands.choices(poste=[
+        app_commands.Choice(name="🛡️ Modération", value="moderation"),
+        app_commands.Choice(name="🎉 Animation", value="animation"),
+    ])
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.guilds(discord.Object(id=GUILD_ID))
+    async def set_recrutement(
+        self,
+        interaction: discord.Interaction,
+        poste: app_commands.Choice[str],
+        lien: str
+    ):
+        """
+        Permet aux administrateurs de configurer les liens de recrutement
+        directement depuis Discord, sans toucher au code.
+        """
+        # Sauvegarde le lien dans le JSON
+        sauvegarder_lien_recrutement(poste.value, lien)
+        
+        # Détermine le nom du poste pour l'affichage
+        nom_poste = "Modération" if poste.value == "moderation" else "Animation"
+        emoji_poste = "🛡️" if poste.value == "moderation" else "🎉"
+        
+        embed = embed_succes(
+            "Lien mis à jour !",
+            f"Le lien de recrutement pour **{emoji_poste} {nom_poste}** a été configuré !\n\n"
+            f"**Nouveau lien :**\n{lien}\n\n"
+            "Les membres verront ce lien quand ils utiliseront `/recrutement`."
+        )
+        
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 async def setup(bot):
