@@ -27,10 +27,10 @@ GUILD_ID = int(os.getenv("GUILD_ID", "0"))
 # ============================================
 
 # Rôle attribué quand quelqu'un accepte le règlement
-ROLE_REGLEMENT_ID = (A REMPLIR)
+ROLE_REGLEMENT_ID = None  # À remplir avec l'ID du rôle
 
 # Rôle VIP achetable dans la boutique
-ROLE_VIP_ID = (A REMPLIR)
+ROLE_VIP_ID = None  # À remplir avec l'ID du rôle
 
 
 # ============================================
