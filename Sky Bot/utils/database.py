@@ -377,3 +377,52 @@ def obtenir_vip_expires() -> list:
             expires.append(int(user_id))
     
     return expires
+
+
+# ============================================
+# 📝 FONCTIONS LIENS DE RECRUTEMENT
+# ============================================
+
+def obtenir_liens_recrutement() -> dict:
+    """
+    Récupère les liens de recrutement sauvegardés.
+    
+    Retourne:
+        Dictionnaire {"moderation": "lien", "animation": "lien"}
+    """
+    return charger_json("recrutement.json", {})
+
+
+def sauvegarder_lien_recrutement(type_poste: str, lien: str):
+    """
+    Sauvegarde un lien de recrutement.
+    
+    Arguments:
+        type_poste: "moderation" ou "animation"
+        lien: Le lien du formulaire Google Forms
+    """
+    liens = obtenir_liens_recrutement()
+    liens[type_poste] = lien
+    sauvegarder_json("recrutement.json", liens)
+
+
+# ============================================
+# 🎉 FONCTIONS GIVEAWAYS
+# ============================================
+
+def obtenir_giveaways() -> dict:
+    """
+    Récupère tous les giveaways (actifs et terminés).
+    
+    Retourne:
+        Dictionnaire {message_id: {prix, fin, nb_gagnants, participants, ...}}
+    """
+    return charger_json("giveaways.json", {})
+
+
+def sauvegarder_giveaways(giveaways: dict):
+    """
+    Sauvegarde tous les giveaways.
+    """
+    sauvegarder_json("giveaways.json", giveaways)
+
