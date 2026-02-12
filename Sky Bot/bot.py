@@ -52,6 +52,8 @@ class SkyBot(commands.Bot):
             "cogs.reglement",     # Système de règlement avec bouton
             "cogs.annonces",      # Annonces tournage + recrutement
             "cogs.shop",          # Boutique (rôles VIP et perso)
+            "cogs.giveaway",      # Système de giveaway
+            "cogs.moderation",    # Commandes de modération (/clear, /clear-salon)
             "cogs.jeux.morpion",  # Jeu du Morpion
             "cogs.jeux.pendu",    # Jeu du Pendu
             "cogs.jeux.snake",    # Jeu du Snake
@@ -68,7 +70,14 @@ class SkyBot(commands.Bot):
         # Synchronise les slash commands avec Discord
         # Cela permet à Discord de connaître les commandes disponibles
         print("🔄 Synchronisation des commandes...")
-        self.tree.copy_global_to(guild=self.guild_object)
+        
+        # Nettoie les commandes globales résiduelles (évite les doublons !)
+        # Les commandes sont toutes enregistrées au niveau du serveur (guild),
+        # donc on vide les commandes globales pour ne pas avoir de doublons.
+        self.tree.clear_commands(guild=None)
+        await self.tree.sync()  # Sync global vide = supprime les commandes globales
+        
+        # Synchronise les commandes du serveur
         await self.tree.sync(guild=self.guild_object)
         print("✅ Commandes synchronisées !")
     
