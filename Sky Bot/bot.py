@@ -26,9 +26,10 @@ class SkyBot(commands.Bot):
         # all() = le bot peut tout voir (messages, membres, etc.)
         intents = discord.Intents.all()
         
-        # Initialise le bot avec un préfixe de commande (pas utilisé ici car on fait des slash commands)
+        # Initialise le bot avec un préfixe de commande
+        # Pas vraiment utilisé ici car le bot utilise surtout des slash commands
         super().__init__(
-            command_prefix="!",  # Préfixe pour les commandes texte (ex: !aide)
+            command_prefix="!",  # Préfixe pour les commandes texte, exemple : !aide
             intents=intents,
             help_command=None  # On désactive la commande d'aide par défaut
         )
@@ -54,6 +55,11 @@ class SkyBot(commands.Bot):
             "cogs.shop",          # Boutique (rôles VIP et perso)
             "cogs.giveaway",      # Système de giveaway
             "cogs.moderation",    # Commandes de modération (/clear, /clear-salon)
+
+            # Protection anti-ping de Sky
+            # Supprime automatiquement les messages qui mentionnent Sky
+            "cogs.ping_guard",
+
             "cogs.jeux.morpion",  # Jeu du Morpion
             "cogs.jeux.pendu",    # Jeu du Pendu
             "cogs.jeux.snake",    # Jeu du Snake
@@ -71,8 +77,10 @@ class SkyBot(commands.Bot):
         # Cela permet à Discord de connaître les commandes disponibles
         print("🔄 Synchronisation des commandes...")
         
-        # Nettoie les commandes globales résiduelles (évite les doublons !)
-        # Les commandes sont toutes enregistrées au niveau du serveur (guild),
+        # Nettoie les commandes globales résiduelles
+        # Cela évite les doublons.
+        #
+        # Les commandes sont toutes enregistrées au niveau du serveur,
         # donc on vide les commandes globales pour ne pas avoir de doublons.
         self.tree.clear_commands(guild=None)
         await self.tree.sync()  # Sync global vide = supprime les commandes globales
@@ -91,7 +99,7 @@ class SkyBot(commands.Bot):
         print(f"🌐 Serveurs connectés : {len(self.guilds)}")
         print("=" * 50)
         
-        # Change le statut du bot (ce qu'il "fait")
+        # Change le statut du bot
         await self.change_presence(
             activity=discord.Activity(
                 type=discord.ActivityType.watching,
